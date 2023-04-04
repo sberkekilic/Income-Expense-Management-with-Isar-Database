@@ -32,8 +32,13 @@ const KartSchema = CollectionSchema(
       name: r'cardOwner',
       type: IsarType.string,
     ),
-    r'skt': PropertySchema(
+    r'select': PropertySchema(
       id: 3,
+      name: r'select',
+      type: IsarType.bool,
+    ),
+    r'skt': PropertySchema(
+      id: 4,
       name: r'skt',
       type: IsarType.string,
     )
@@ -94,7 +99,8 @@ void _kartSerialize(
   writer.writeString(offsets[0], object.cardName);
   writer.writeString(offsets[1], object.cardNumber);
   writer.writeString(offsets[2], object.cardOwner);
-  writer.writeString(offsets[3], object.skt);
+  writer.writeBool(offsets[3], object.select);
+  writer.writeString(offsets[4], object.skt);
 }
 
 Kart _kartDeserialize(
@@ -108,7 +114,8 @@ Kart _kartDeserialize(
   object.cardNumber = reader.readStringOrNull(offsets[1]);
   object.cardOwner = reader.readStringOrNull(offsets[2]);
   object.id = id;
-  object.skt = reader.readStringOrNull(offsets[3]);
+  object.select = reader.readBool(offsets[3]);
+  object.skt = reader.readStringOrNull(offsets[4]);
   return object;
 }
 
@@ -126,6 +133,8 @@ P _kartDeserializeProp<P>(
     case 2:
       return (reader.readStringOrNull(offset)) as P;
     case 3:
+      return (reader.readBool(offset)) as P;
+    case 4:
       return (reader.readStringOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -709,6 +718,15 @@ extension KartQueryFilter on QueryBuilder<Kart, Kart, QFilterCondition> {
     });
   }
 
+  QueryBuilder<Kart, Kart, QAfterFilterCondition> selectEqualTo(bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'select',
+        value: value,
+      ));
+    });
+  }
+
   QueryBuilder<Kart, Kart, QAfterFilterCondition> sktIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNull(
@@ -895,6 +913,18 @@ extension KartQuerySortBy on QueryBuilder<Kart, Kart, QSortBy> {
     });
   }
 
+  QueryBuilder<Kart, Kart, QAfterSortBy> sortBySelect() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'select', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Kart, Kart, QAfterSortBy> sortBySelectDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'select', Sort.desc);
+    });
+  }
+
   QueryBuilder<Kart, Kart, QAfterSortBy> sortBySkt() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'skt', Sort.asc);
@@ -957,6 +987,18 @@ extension KartQuerySortThenBy on QueryBuilder<Kart, Kart, QSortThenBy> {
     });
   }
 
+  QueryBuilder<Kart, Kart, QAfterSortBy> thenBySelect() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'select', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Kart, Kart, QAfterSortBy> thenBySelectDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'select', Sort.desc);
+    });
+  }
+
   QueryBuilder<Kart, Kart, QAfterSortBy> thenBySkt() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'skt', Sort.asc);
@@ -992,6 +1034,12 @@ extension KartQueryWhereDistinct on QueryBuilder<Kart, Kart, QDistinct> {
     });
   }
 
+  QueryBuilder<Kart, Kart, QDistinct> distinctBySelect() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'select');
+    });
+  }
+
   QueryBuilder<Kart, Kart, QDistinct> distinctBySkt(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -1022,6 +1070,12 @@ extension KartQueryProperty on QueryBuilder<Kart, Kart, QQueryProperty> {
   QueryBuilder<Kart, String?, QQueryOperations> cardOwnerProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'cardOwner');
+    });
+  }
+
+  QueryBuilder<Kart, bool, QQueryOperations> selectProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'select');
     });
   }
 

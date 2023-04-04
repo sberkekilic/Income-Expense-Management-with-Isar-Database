@@ -8,4 +8,5 @@ class Kart {
   String? cardOwner;
   String? cardNumber;
   String? skt;
+  bool select = false;
 }

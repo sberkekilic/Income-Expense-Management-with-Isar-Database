@@ -15,9 +15,26 @@ class KartYonetim extends StatefulWidget {
   State<KartYonetim> createState() => _KartYonetimState();
 }
 
-class _KartYonetimState extends State<KartYonetim>{
+class _KartYonetimState extends State<KartYonetim> {
   List<Kart> karts = [];
-  final _formKey = GlobalKey<FormBuilderState>();
+  Kart? dropdownValue;
+  List<String> banks = [
+    "Akbank",
+    "DenizBank",
+    "Fibabanka",
+    "Garanti BBVA",
+    "Halkbank",
+    "HSBC",
+    "ING",
+    "Odeabank",
+    "QNB Finansbank",
+    "TEB",
+    "Türkiye İş Bankası",
+    "Vakıfbank",
+    "Yapı Kredi",
+    "Ziraat Bankası"
+  ];
+  String dropdownBank = "Akbank";
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _ownerController = TextEditingController();
   final TextEditingController _numberController = TextEditingController();
@@ -29,7 +46,7 @@ class _KartYonetimState extends State<KartYonetim>{
       ..skt = _sktController.text
       ..cardNumber = _numberController.text
       ..cardOwner = _ownerController.text
-      ..cardName = _nameController.text;
+      ..cardName = dropdownBank;
     //FIXME 4: Removed isar parameter from Isar.writeTxn()
     await widget.isar.writeTxn(() async {
       await kartCollection.put(newKart);
@@ -39,8 +56,7 @@ class _KartYonetimState extends State<KartYonetim>{
     _ownerController.clear();
     _numberController.clear();
     _sktController.clear();
-    setState(() {
-    });
+    setState(() {});
   }
 
   @override
@@ -50,51 +66,83 @@ class _KartYonetimState extends State<KartYonetim>{
     _readCard();
     print("Kart-yonetim initstate");
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Kart Yönetim',style: TextStyle(color: Colors.black, fontSize: 24)),
-        backgroundColor: Colors.white,
-        leading:  IconButton(
-          onPressed: () async{
-            Navigator.pop(context, true);
-          },
-          icon:  Icon(Icons.arrow_back_rounded, color: Colors.black,),
+        appBar: AppBar(
+          title: const Text('Kart Yönetim',
+              style: TextStyle(color: Colors.black, fontSize: 24)),
+          backgroundColor: Colors.white,
+          leading: IconButton(
+            onPressed: () async {
+              Navigator.pop(context, true);
+            },
+            icon: Icon(
+              Icons.arrow_back_rounded,
+              color: Colors.black,
+            ),
+          ),
         ),
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text("Name"),
-            TextFormField(
-              controller: _nameController,
-            ),
-            Text("Owner"),
-            TextFormField(
-              controller: _ownerController,
-            ),
-            Text("Number"),
-            TextFormField(
-              controller: _numberController,
-            ),
-            Text("SKT"),
-            TextFormField(
-              controller: _sktController,
-            ),
-            Align(
-                alignment: Alignment.center,
-                child: ElevatedButton(
-                    onPressed: () {
-                      addKart();
-                    },
-                    child: const Text("Add"))),
-          ],
-        ),
-      )
-    );
+        body: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text("Bank Name"),
+              SizedBox(
+                child: DropdownButton(
+                  isExpanded: true,
+                  value: dropdownBank,
+                  icon:  Icon(Icons.keyboard_arrow_down),
+                  items: banks
+                      .map<DropdownMenuItem<String>>((String bank) {
+                    return DropdownMenuItem<String>(
+                        value: bank, child: Text(bank));
+                  }).toList(),
+                  onChanged: (String? newBank) {
+                    setState(() {
+                      dropdownBank = newBank!;
+                    });
+                  },
+                ),
+              ),
+              Text("Owner"),
+              TextFormField(
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide(width: 4, color: Colors.black)),
+                ),
+                controller: _ownerController,
+              ),
+              Text("Number"),
+              TextFormField(
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide(width: 4, color: Colors.black)),
+                ),
+                controller: _numberController,
+              ),
+              Text("SKT"),
+              TextFormField(
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide(width: 4, color: Colors.black)),
+                ),
+                controller: _sktController,
+              ),
+              Align(
+                  alignment: Alignment.center,
+                  child: ElevatedButton(
+                      onPressed: () {
+                        addKart();
+                      },
+                      child: const Text("Add"))),
+            ],
+          ),
+        ));
   }
 
   _readCard() async {
@@ -105,14 +153,13 @@ class _KartYonetimState extends State<KartYonetim>{
     });
   }
 
-  readAllCards() async{
+  readAllCards() async {
     karts = await widget.isar.karts.where().findAll();
-    setState(() {
-
-    });
+    setState(() {});
   }
 
-  addCard(String cardName, String cardOwner, String cardNumber, String skt) async {
+  addCard(
+      String cardName, String cardOwner, String cardNumber, String skt) async {
     Kart newCard = Kart()
       ..cardName = cardName
       ..cardOwner = cardOwner
@@ -124,6 +171,4 @@ class _KartYonetimState extends State<KartYonetim>{
       print(addedID);
     });
   }
-
 }
-
