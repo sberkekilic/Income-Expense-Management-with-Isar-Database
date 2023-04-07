@@ -7,4 +7,5 @@ class Gelir {
   String? bankName;
   String? transactionTime;
   String? amount;
+  DateTime? myDateTime;
 }

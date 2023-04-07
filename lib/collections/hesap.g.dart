@@ -17,15 +17,20 @@ const HesapSchema = CollectionSchema(
   name: r'Hesap',
   id: 4952774218421634050,
   properties: {
-    r'accountName': PropertySchema(
+    r'bankName': PropertySchema(
       id: 0,
-      name: r'accountName',
+      name: r'bankName',
       type: IsarType.string,
     ),
     r'ibanNumber': PropertySchema(
       id: 1,
       name: r'ibanNumber',
       type: IsarType.string,
+    ),
+    r'select': PropertySchema(
+      id: 2,
+      name: r'select',
+      type: IsarType.bool,
     )
   },
   estimateSize: _hesapEstimateSize,
@@ -49,7 +54,7 @@ int _hesapEstimateSize(
 ) {
   var bytesCount = offsets.last;
   {
-    final value = object.accountName;
+    final value = object.bankName;
     if (value != null) {
       bytesCount += 3 + value.length * 3;
     }
@@ -69,8 +74,9 @@ void _hesapSerialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  writer.writeString(offsets[0], object.accountName);
+  writer.writeString(offsets[0], object.bankName);
   writer.writeString(offsets[1], object.ibanNumber);
+  writer.writeBool(offsets[2], object.select);
 }
 
 Hesap _hesapDeserialize(
@@ -80,9 +86,10 @@ Hesap _hesapDeserialize(
   Map<Type, List<int>> allOffsets,
 ) {
   final object = Hesap();
-  object.accountName = reader.readStringOrNull(offsets[0]);
+  object.bankName = reader.readStringOrNull(offsets[0]);
   object.ibanNumber = reader.readStringOrNull(offsets[1]);
   object.id = id;
+  object.select = reader.readBool(offsets[2]);
   return object;
 }
 
@@ -97,6 +104,8 @@ P _hesapDeserializeProp<P>(
       return (reader.readStringOrNull(offset)) as P;
     case 1:
       return (reader.readStringOrNull(offset)) as P;
+    case 2:
+      return (reader.readBool(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
@@ -190,36 +199,36 @@ extension HesapQueryWhere on QueryBuilder<Hesap, Hesap, QWhereClause> {
 }
 
 extension HesapQueryFilter on QueryBuilder<Hesap, Hesap, QFilterCondition> {
-  QueryBuilder<Hesap, Hesap, QAfterFilterCondition> accountNameIsNull() {
+  QueryBuilder<Hesap, Hesap, QAfterFilterCondition> bankNameIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'accountName',
+        property: r'bankName',
       ));
     });
   }
 
-  QueryBuilder<Hesap, Hesap, QAfterFilterCondition> accountNameIsNotNull() {
+  QueryBuilder<Hesap, Hesap, QAfterFilterCondition> bankNameIsNotNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'accountName',
+        property: r'bankName',
       ));
     });
   }
 
-  QueryBuilder<Hesap, Hesap, QAfterFilterCondition> accountNameEqualTo(
+  QueryBuilder<Hesap, Hesap, QAfterFilterCondition> bankNameEqualTo(
     String? value, {
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'accountName',
+        property: r'bankName',
         value: value,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<Hesap, Hesap, QAfterFilterCondition> accountNameGreaterThan(
+  QueryBuilder<Hesap, Hesap, QAfterFilterCondition> bankNameGreaterThan(
     String? value, {
     bool include = false,
     bool caseSensitive = true,
@@ -227,14 +236,14 @@ extension HesapQueryFilter on QueryBuilder<Hesap, Hesap, QFilterCondition> {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r'accountName',
+        property: r'bankName',
         value: value,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<Hesap, Hesap, QAfterFilterCondition> accountNameLessThan(
+  QueryBuilder<Hesap, Hesap, QAfterFilterCondition> bankNameLessThan(
     String? value, {
     bool include = false,
     bool caseSensitive = true,
@@ -242,14 +251,14 @@ extension HesapQueryFilter on QueryBuilder<Hesap, Hesap, QFilterCondition> {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r'accountName',
+        property: r'bankName',
         value: value,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<Hesap, Hesap, QAfterFilterCondition> accountNameBetween(
+  QueryBuilder<Hesap, Hesap, QAfterFilterCondition> bankNameBetween(
     String? lower,
     String? upper, {
     bool includeLower = true,
@@ -258,7 +267,7 @@ extension HesapQueryFilter on QueryBuilder<Hesap, Hesap, QFilterCondition> {
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r'accountName',
+        property: r'bankName',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -268,69 +277,69 @@ extension HesapQueryFilter on QueryBuilder<Hesap, Hesap, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Hesap, Hesap, QAfterFilterCondition> accountNameStartsWith(
+  QueryBuilder<Hesap, Hesap, QAfterFilterCondition> bankNameStartsWith(
     String value, {
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'accountName',
+        property: r'bankName',
         value: value,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<Hesap, Hesap, QAfterFilterCondition> accountNameEndsWith(
+  QueryBuilder<Hesap, Hesap, QAfterFilterCondition> bankNameEndsWith(
     String value, {
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'accountName',
+        property: r'bankName',
         value: value,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<Hesap, Hesap, QAfterFilterCondition> accountNameContains(
+  QueryBuilder<Hesap, Hesap, QAfterFilterCondition> bankNameContains(
       String value,
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.contains(
-        property: r'accountName',
+        property: r'bankName',
         value: value,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<Hesap, Hesap, QAfterFilterCondition> accountNameMatches(
+  QueryBuilder<Hesap, Hesap, QAfterFilterCondition> bankNameMatches(
       String pattern,
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.matches(
-        property: r'accountName',
+        property: r'bankName',
         wildcard: pattern,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<Hesap, Hesap, QAfterFilterCondition> accountNameIsEmpty() {
+  QueryBuilder<Hesap, Hesap, QAfterFilterCondition> bankNameIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'accountName',
+        property: r'bankName',
         value: '',
       ));
     });
   }
 
-  QueryBuilder<Hesap, Hesap, QAfterFilterCondition> accountNameIsNotEmpty() {
+  QueryBuilder<Hesap, Hesap, QAfterFilterCondition> bankNameIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'accountName',
+        property: r'bankName',
         value: '',
       ));
     });
@@ -533,6 +542,15 @@ extension HesapQueryFilter on QueryBuilder<Hesap, Hesap, QFilterCondition> {
       ));
     });
   }
+
+  QueryBuilder<Hesap, Hesap, QAfterFilterCondition> selectEqualTo(bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'select',
+        value: value,
+      ));
+    });
+  }
 }
 
 extension HesapQueryObject on QueryBuilder<Hesap, Hesap, QFilterCondition> {}
@@ -540,15 +558,15 @@ extension HesapQueryObject on QueryBuilder<Hesap, Hesap, QFilterCondition> {}
 extension HesapQueryLinks on QueryBuilder<Hesap, Hesap, QFilterCondition> {}
 
 extension HesapQuerySortBy on QueryBuilder<Hesap, Hesap, QSortBy> {
-  QueryBuilder<Hesap, Hesap, QAfterSortBy> sortByAccountName() {
+  QueryBuilder<Hesap, Hesap, QAfterSortBy> sortByBankName() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'accountName', Sort.asc);
+      return query.addSortBy(r'bankName', Sort.asc);
     });
   }
 
-  QueryBuilder<Hesap, Hesap, QAfterSortBy> sortByAccountNameDesc() {
+  QueryBuilder<Hesap, Hesap, QAfterSortBy> sortByBankNameDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'accountName', Sort.desc);
+      return query.addSortBy(r'bankName', Sort.desc);
     });
   }
 
@@ -563,18 +581,30 @@ extension HesapQuerySortBy on QueryBuilder<Hesap, Hesap, QSortBy> {
       return query.addSortBy(r'ibanNumber', Sort.desc);
     });
   }
-}
 
-extension HesapQuerySortThenBy on QueryBuilder<Hesap, Hesap, QSortThenBy> {
-  QueryBuilder<Hesap, Hesap, QAfterSortBy> thenByAccountName() {
+  QueryBuilder<Hesap, Hesap, QAfterSortBy> sortBySelect() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'accountName', Sort.asc);
+      return query.addSortBy(r'select', Sort.asc);
     });
   }
 
-  QueryBuilder<Hesap, Hesap, QAfterSortBy> thenByAccountNameDesc() {
+  QueryBuilder<Hesap, Hesap, QAfterSortBy> sortBySelectDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'accountName', Sort.desc);
+      return query.addSortBy(r'select', Sort.desc);
+    });
+  }
+}
+
+extension HesapQuerySortThenBy on QueryBuilder<Hesap, Hesap, QSortThenBy> {
+  QueryBuilder<Hesap, Hesap, QAfterSortBy> thenByBankName() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'bankName', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Hesap, Hesap, QAfterSortBy> thenByBankNameDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'bankName', Sort.desc);
     });
   }
 
@@ -601,13 +631,25 @@ extension HesapQuerySortThenBy on QueryBuilder<Hesap, Hesap, QSortThenBy> {
       return query.addSortBy(r'id', Sort.desc);
     });
   }
+
+  QueryBuilder<Hesap, Hesap, QAfterSortBy> thenBySelect() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'select', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Hesap, Hesap, QAfterSortBy> thenBySelectDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'select', Sort.desc);
+    });
+  }
 }
 
 extension HesapQueryWhereDistinct on QueryBuilder<Hesap, Hesap, QDistinct> {
-  QueryBuilder<Hesap, Hesap, QDistinct> distinctByAccountName(
+  QueryBuilder<Hesap, Hesap, QDistinct> distinctByBankName(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'accountName', caseSensitive: caseSensitive);
+      return query.addDistinctBy(r'bankName', caseSensitive: caseSensitive);
     });
   }
 
@@ -615,6 +657,12 @@ extension HesapQueryWhereDistinct on QueryBuilder<Hesap, Hesap, QDistinct> {
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'ibanNumber', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<Hesap, Hesap, QDistinct> distinctBySelect() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'select');
     });
   }
 }
@@ -626,15 +674,21 @@ extension HesapQueryProperty on QueryBuilder<Hesap, Hesap, QQueryProperty> {
     });
   }
 
-  QueryBuilder<Hesap, String?, QQueryOperations> accountNameProperty() {
+  QueryBuilder<Hesap, String?, QQueryOperations> bankNameProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'accountName');
+      return query.addPropertyName(r'bankName');
     });
   }
 
   QueryBuilder<Hesap, String?, QQueryOperations> ibanNumberProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'ibanNumber');
+    });
+  }
+
+  QueryBuilder<Hesap, bool, QQueryOperations> selectProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'select');
     });
   }
 }

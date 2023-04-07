@@ -7,4 +7,5 @@ class Gider {
   String? bankName;
   String? transactionTime;
   String? amount;
+  DateTime? myDateTime;
 }

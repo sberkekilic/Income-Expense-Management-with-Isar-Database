@@ -13,6 +13,7 @@ class IsarService {
     db = openIsar();
   }
 
+
   Future<Isar> openIsar() async {
     if (Isar.instanceNames.isEmpty){
       return await Isar.open(
@@ -23,6 +24,7 @@ class IsarService {
 
     return Future.value(Isar.getInstance());
   }
+
   //KART EKLEMEK
   Future<void> createCard(Kart newCard) async {
     final isar = await db;

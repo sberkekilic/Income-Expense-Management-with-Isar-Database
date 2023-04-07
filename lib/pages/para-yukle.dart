@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:isar/isar.dart';
+import 'package:isar_database/collections/gelir.dart';
 
 import '../collections/hesap.dart';
 import 'hesap-yonetim.dart';
@@ -13,11 +15,29 @@ class ParaYukle extends StatefulWidget {
 }
 
 class  _ParaYukleState extends State<ParaYukle> {
+  int selectedIndex = -1;
   List<Hesap> hesaps = [];
+  String hesapadi = "";
+  DateTime now = DateTime.now();
+  late String formattedDate = DateFormat('dd.MM.yyyy').format(now);
+  late DateTime formattedDateTime = DateFormat('dd.MM.yyyy').parse(formattedDate);
+  final TextEditingController _amountController = TextEditingController();
 
-  addHesap(String accountName, String ibanNumber) async {
+  addGelir() async {
+    final gelirCollection = widget.isar.gelirs;
+    final newGelir = Gelir()
+      ..amount = _amountController.text
+      ..bankName = hesapadi
+      ..myDateTime = formattedDateTime;
+    await widget.isar.writeTxn(() async {
+     await gelirCollection..put(newGelir);
+    });
+  }
+
+  addHesap(
+      String bankName, String ibanNumber) async {
     Hesap  newHesap = Hesap()
-      ..accountName = accountName
+      ..bankName = bankName
       ..ibanNumber = ibanNumber;
 
     await widget.isar.writeTxn(() async {
@@ -26,12 +46,11 @@ class  _ParaYukleState extends State<ParaYukle> {
     });
   }
 
-  editHesap(int id, String accountName, String ibanNumber) async {
+  editHesap(int id, String bankName, String ibanNumber) async {
     Hesap  newHesap = Hesap()
      ..id = id
-      ..accountName = accountName
+      ..bankName = bankName
       ..ibanNumber = ibanNumber;
-
     await widget.isar.writeTxn(() async {
       var addedID = await widget.isar.hesaps.put(newHesap);
       print(addedID);
@@ -87,6 +106,16 @@ class  _ParaYukleState extends State<ParaYukle> {
     }
   }
 
+  test(Hesap hesap) async {
+    Hesap updatedHesap = hesap;
+    updatedHesap.select = !updatedHesap.select;
+
+    await widget.isar.writeTxn(() async {
+      await widget.isar.hesaps.put(updatedHesap);
+      readAllHesaps();
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -98,8 +127,8 @@ class  _ParaYukleState extends State<ParaYukle> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(onPressed: (){
-          Navigator.pop(context);
+        leading: IconButton(onPressed: ()async{
+          Navigator.pop(context, true);
         },
             icon: Icon(Icons.arrow_back), color: Colors.black),
         title: const Text('Para yükleme',style: TextStyle(color: Colors.black, fontSize: 24)),
@@ -125,40 +154,73 @@ class  _ParaYukleState extends State<ParaYukle> {
                 onPrimary: Colors.white),
           ),
           Expanded(
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: hesaps
-                      .map(
-                        (e) => Container(
-                      padding: EdgeInsets.all(15),
-                      margin: EdgeInsets.all(5),
-                      decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: Colors.red, width: 4)
-                      ),
-                      child: Column(
-                        children: [
-                          Align(
-                            child: Text(
-                                e.accountName!
-                            ),
-                            alignment: Alignment.topLeft,
-                          ),
-                          Align(
-                              child: Text(
-                                  e.ibanNumber!
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  Wrap(
+                    direction: Axis.horizontal,
+                    children:
+                    List.generate(hesaps.length, (index){
+                      return InkWell(
+                        onTap: (){
+                          setState(() {
+                            selectedIndex = index;
+                          });
+                        },
+                        child: Container(
+                            child: Card(
+                              child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children:
+                                  <Widget>[
+                                    ListTile(
+                                      title: Text(hesaps[index].bankName!),
+                                      subtitle: Text(hesaps[index].ibanNumber!),
+                                    ),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      children: <Widget>[
+                                        ElevatedButton(
+                                            onPressed: (){
+                                              selectedIndex = index;
+                                              hesapadi = hesaps[index].bankName!;
+                                              setState(() {
+                                                test(hesaps[index]);
+                                              });
+                                            },
+                                            child: selectedIndex == index?Text("checked"): Text("uncheck")),
+                                      ],
+                                    )
+                                  ]
                               ),
-                              alignment: Alignment.bottomLeft
-                          ),
-                        ],
-                      ),
+                            )
+                        ),
+                      );
+                    }
                     ),
-                  ).toList(),
-                ),
-              )
-          )
+                  ),
+                  Text("Seçildi: $hesapadi"),
+                  Text("Yüklemek  istediğin tutar"),
+                  TextFormField(
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide:
+                          BorderSide(width: 4, color: Colors.black)),
+                    ),
+                    controller: _amountController,
+                  ),
+                  Align(
+                      alignment: Alignment.center,
+                      child: ElevatedButton(
+                          onPressed: () {
+                            addGelir();
+                          },
+                          child: const Text("Add"))),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );

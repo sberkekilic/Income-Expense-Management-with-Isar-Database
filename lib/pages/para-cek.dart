@@ -3,11 +3,11 @@ import 'package:isar/isar.dart';
 import 'package:isar_database/collections/kart.dart';
 import 'package:intl/intl.dart';
 import '../collections/gider.dart';
+import '../main.dart';
 import 'kart-yonetim.dart';
 
 class ParaCek extends StatefulWidget {
   final Isar isar;
-
   const ParaCek({Key? key, required this.isar}) : super(key: key);
 
   @override
@@ -15,11 +15,13 @@ class ParaCek extends StatefulWidget {
 }
 
 class _ParaCekState extends State<ParaCek> {
-   int selectedIndex = -1;
+  int selectedIndex = -1;
   List<Kart> karts = [];
   String kartadi = "";
-  DateFormat dateFormat = DateFormat("dd.MM.yyyy HH:mm:ss");
-  late String transactionTime = dateFormat.format(DateTime.now());
+  DateTime now = DateTime.now();
+  late String formattedDate = DateFormat('dd.MM.yyyy').format(now);
+  late DateTime formattedDateTime =
+      DateFormat('dd.MM.yyyy').parse(formattedDate);
   final TextEditingController _amountController = TextEditingController();
 
   addGider() async {
@@ -27,7 +29,7 @@ class _ParaCekState extends State<ParaCek> {
     final newGider = Gider()
       ..amount = _amountController.text
       ..bankName = kartadi
-      ..transactionTime = transactionTime;
+      ..myDateTime = formattedDateTime;
     //FIXME 4: Removed isar parameter from Isar.writeTxn()
     await widget.isar.writeTxn(() async {
       await giderCollection
@@ -80,8 +82,11 @@ class _ParaCekState extends State<ParaCek> {
   }
 
   readAllCards() async {
-    karts = await widget.isar.karts.where().findAll();
-    setState(() {});
+    final cardCollection = widget.isar.karts;
+    final getCards = await cardCollection.where().findAll();
+    setState(() {
+      karts = getCards;
+    });
   }
 
   test(Kart kart) async {
@@ -134,16 +139,34 @@ class _ParaCekState extends State<ParaCek> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-            onPressed: () {
-              Navigator.pop(context);
-            },
-            icon: Icon(Icons.arrow_back),
-            color: Colors.black),
-        title: const Text('Para çekme',
-            style: TextStyle(color: Colors.black, fontSize: 24)),
-        backgroundColor: Colors.white,
+      appBar: PreferredSize(
+        preferredSize: Size(MediaQuery.of(context).size.height,
+            MediaQuery.of(context).size.height * 0.10),
+        child: AppBar(
+          automaticallyImplyLeading: false,
+          elevation: 0.5,
+          backgroundColor: Colors.white,
+          flexibleSpace: Container(
+            padding: EdgeInsets.only(left: 25),
+            alignment: Alignment.centerLeft,
+            child: Row(
+              children: [
+                IconButton(
+                    icon: Icon(Icons.arrow_back, color: Colors.black),
+                    onPressed: () async {
+                      Navigator.pop(context,true);
+                    }
+                    ),
+                SizedBox(width: 12),
+                Text("Para çekme",
+                    style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 36,
+                        fontWeight: FontWeight.bold)),
+              ],
+            ),
+          ),
+        ),
       ),
       body: Column(
         children: [
@@ -162,7 +185,7 @@ class _ParaCekState extends State<ParaCek> {
             },
             child: Text("Kart Yönetim", style: TextStyle(fontSize: 14)),
             style: ElevatedButton.styleFrom(
-                primary: Color(0xff253f50), onPrimary: Colors.white),
+                foregroundColor: Colors.white, backgroundColor: Color(0xff253f50)),
           ),
           Expanded(
             child: SingleChildScrollView(
@@ -170,45 +193,48 @@ class _ParaCekState extends State<ParaCek> {
                 children: [
                   Wrap(
                     direction: Axis.horizontal,
-                    children:
-                    List.generate(karts.length, (index){
+                    children: List.generate(karts.length, (index) {
                       return InkWell(
-                        onTap: (){
+                        onTap: () {
+                          selectedIndex = index;
+                          kartadi = karts[index].cardName!;
                           setState(() {
-                            selectedIndex = index;
+                            test(karts[index]);
                           });
                         },
                         child: Container(
-                          child: Card(
-                            child: Column(
+                            child: Card(
+                          child: Column(
                               mainAxisSize: MainAxisSize.min,
-                              children:
-                                <Widget>[
-                                  ListTile(
-                                    title: Text(karts[index].cardName!+" "+karts[index].cardOwner!),
-                                    subtitle: Text(karts[index].cardNumber!+" "+karts[index].skt!),
-                                  ),
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.end,
-                                      children: <Widget>[
-                                        ElevatedButton(
-                                            onPressed: (){
-                                              selectedIndex = index;
-                                              kartadi = karts[index].cardOwner!;
-                                              setState(() {
-                                                test(karts[index]);
-                                              });
-                                            },
-                                            child: selectedIndex == index?Text("checked"): Text("uncheck")),
-                                      ],
-                                  )
-                                ]
-                            ),
-                          )
-                        ),
+                              children: <Widget>[
+                                ListTile(
+                                  title: Text(karts[index].cardName! +
+                                      " " +
+                                      karts[index].cardOwner!),
+                                  subtitle: Text(karts[index].cardNumber! +
+                                      " " +
+                                      karts[index].skt!),
+                                ),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: <Widget>[
+                                    ElevatedButton(
+                                        onPressed: () {
+                                          selectedIndex = index;
+                                          kartadi = karts[index].cardName!;
+                                          setState(() {
+                                            test(karts[index]);
+                                          });
+                                        },
+                                        child: selectedIndex == index
+                                            ? Text("checked")
+                                            : Text("uncheck")),
+                                  ],
+                                )
+                              ]),
+                        )),
                       );
                     }),
-
                   ),
                   Text("Seçildi: $kartadi"),
                   Text("Çekmek istediğin tutar"),
@@ -227,7 +253,7 @@ class _ParaCekState extends State<ParaCek> {
                           onPressed: () {
                             addGider();
                           },
-                          child: const Text("Add"))),
+                          child: const Text("Para çek"))),
                 ],
               ),
             ),
@@ -236,4 +262,6 @@ class _ParaCekState extends State<ParaCek> {
       ),
     );
   }
-}
+
+  }
+

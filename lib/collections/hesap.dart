@@ -4,6 +4,7 @@ part 'hesap.g.dart';
 @collection
 class Hesap {
   Id id = Isar.autoIncrement;
-  String? accountName;
+  String? bankName;
   String? ibanNumber;
+  bool select = false;
 }

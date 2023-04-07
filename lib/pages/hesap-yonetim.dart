@@ -17,21 +17,36 @@ class HesapYonetim extends StatefulWidget {
 
 class _HesapYonetimState extends State<HesapYonetim>{
   List<Hesap> hesaps = [];
-  final _formKey = GlobalKey<FormBuilderState>();
-  final TextEditingController _nameController = TextEditingController();
+  Hesap? dropdownValue;
+  List<String> banks = [
+    "Akbank",
+    "DenizBank",
+    "Fibabanka",
+    "Garanti BBVA",
+    "Halkbank",
+    "HSBC",
+    "ING",
+    "Odeabank",
+    "QNB Finansbank",
+    "TEB",
+    "Türkiye İş Bankası",
+    "Vakıfbank",
+    "Yapı Kredi",
+    "Ziraat Bankası"
+  ];
+  String dropdownBank = "Akbank";
   final TextEditingController _ibanController = TextEditingController();
 
   addHesap() async {
     final hesapCollection = widget.isar.hesaps;
     final newHesap = Hesap()
-      ..accountName = _nameController.text
+      ..bankName = dropdownBank
       ..ibanNumber = _ibanController.text;
     //FIXME 4: Removed isar parameter from Isar.writeTxn()
     await widget.isar.writeTxn(() async {
       await hesapCollection.put(newHesap);
     });
 
-    _nameController.clear();
     _ibanController.clear();
     setState(() {
     });
@@ -62,12 +77,31 @@ class _HesapYonetimState extends State<HesapYonetim>{
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text("Name"),
-              TextFormField(
-                controller: _nameController,
+              Text("Bank Name"),
+              SizedBox(
+                child: DropdownButton(
+                  isExpanded: true,
+                  value: dropdownBank,
+                  icon:  Icon(Icons.keyboard_arrow_down),
+                  items: banks
+                      .map<DropdownMenuItem<String>>((String bank) {
+                    return DropdownMenuItem<String>(
+                        value: bank, child: Text(bank));
+                  }).toList(),
+                  onChanged: (String? newBank) {
+                    setState(() {
+                      dropdownBank = newBank!;
+                    });
+                  },
+                ),
               ),
               Text("IBAN"),
               TextFormField(
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide(width: 4, color: Colors.black)),
+                ),
                 controller: _ibanController,
               ),
               Align(

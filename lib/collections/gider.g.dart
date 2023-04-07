@@ -27,8 +27,13 @@ const GiderSchema = CollectionSchema(
       name: r'bankName',
       type: IsarType.string,
     ),
-    r'transactionTime': PropertySchema(
+    r'myDateTime': PropertySchema(
       id: 2,
+      name: r'myDateTime',
+      type: IsarType.dateTime,
+    ),
+    r'transactionTime': PropertySchema(
+      id: 3,
       name: r'transactionTime',
       type: IsarType.string,
     )
@@ -82,7 +87,8 @@ void _giderSerialize(
 ) {
   writer.writeString(offsets[0], object.amount);
   writer.writeString(offsets[1], object.bankName);
-  writer.writeString(offsets[2], object.transactionTime);
+  writer.writeDateTime(offsets[2], object.myDateTime);
+  writer.writeString(offsets[3], object.transactionTime);
 }
 
 Gider _giderDeserialize(
@@ -95,7 +101,8 @@ Gider _giderDeserialize(
   object.amount = reader.readStringOrNull(offsets[0]);
   object.bankName = reader.readStringOrNull(offsets[1]);
   object.id = id;
-  object.transactionTime = reader.readStringOrNull(offsets[2]);
+  object.myDateTime = reader.readDateTimeOrNull(offsets[2]);
+  object.transactionTime = reader.readStringOrNull(offsets[3]);
   return object;
 }
 
@@ -111,6 +118,8 @@ P _giderDeserializeProp<P>(
     case 1:
       return (reader.readStringOrNull(offset)) as P;
     case 2:
+      return (reader.readDateTimeOrNull(offset)) as P;
+    case 3:
       return (reader.readStringOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -548,6 +557,75 @@ extension GiderQueryFilter on QueryBuilder<Gider, Gider, QFilterCondition> {
     });
   }
 
+  QueryBuilder<Gider, Gider, QAfterFilterCondition> myDateTimeIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'myDateTime',
+      ));
+    });
+  }
+
+  QueryBuilder<Gider, Gider, QAfterFilterCondition> myDateTimeIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'myDateTime',
+      ));
+    });
+  }
+
+  QueryBuilder<Gider, Gider, QAfterFilterCondition> myDateTimeEqualTo(
+      DateTime? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'myDateTime',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Gider, Gider, QAfterFilterCondition> myDateTimeGreaterThan(
+    DateTime? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'myDateTime',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Gider, Gider, QAfterFilterCondition> myDateTimeLessThan(
+    DateTime? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'myDateTime',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Gider, Gider, QAfterFilterCondition> myDateTimeBetween(
+    DateTime? lower,
+    DateTime? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'myDateTime',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
   QueryBuilder<Gider, Gider, QAfterFilterCondition> transactionTimeIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNull(
@@ -725,6 +803,18 @@ extension GiderQuerySortBy on QueryBuilder<Gider, Gider, QSortBy> {
     });
   }
 
+  QueryBuilder<Gider, Gider, QAfterSortBy> sortByMyDateTime() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'myDateTime', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Gider, Gider, QAfterSortBy> sortByMyDateTimeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'myDateTime', Sort.desc);
+    });
+  }
+
   QueryBuilder<Gider, Gider, QAfterSortBy> sortByTransactionTime() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'transactionTime', Sort.asc);
@@ -775,6 +865,18 @@ extension GiderQuerySortThenBy on QueryBuilder<Gider, Gider, QSortThenBy> {
     });
   }
 
+  QueryBuilder<Gider, Gider, QAfterSortBy> thenByMyDateTime() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'myDateTime', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Gider, Gider, QAfterSortBy> thenByMyDateTimeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'myDateTime', Sort.desc);
+    });
+  }
+
   QueryBuilder<Gider, Gider, QAfterSortBy> thenByTransactionTime() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'transactionTime', Sort.asc);
@@ -803,6 +905,12 @@ extension GiderQueryWhereDistinct on QueryBuilder<Gider, Gider, QDistinct> {
     });
   }
 
+  QueryBuilder<Gider, Gider, QDistinct> distinctByMyDateTime() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'myDateTime');
+    });
+  }
+
   QueryBuilder<Gider, Gider, QDistinct> distinctByTransactionTime(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -828,6 +936,12 @@ extension GiderQueryProperty on QueryBuilder<Gider, Gider, QQueryProperty> {
   QueryBuilder<Gider, String?, QQueryOperations> bankNameProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'bankName');
+    });
+  }
+
+  QueryBuilder<Gider, DateTime?, QQueryOperations> myDateTimeProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'myDateTime');
     });
   }
 
